@@ -8,11 +8,13 @@ Never sacrifice character consistency; never break memory.
 **Design gate (this sprint): documentation only — NO implementation.**
 - [x] ADR-0004 + 7 design docs under `docs/relationship/` (SPEC, STATE_MACHINE, DATABASE_SCHEMA,
   SEQUENCE_DIAGRAM, API, TEST_PLAN, MIGRATION_PLAN_v0.2) + index
-- [ ] Implementation deferred to a later sprint, phased per `MIGRATION_PLAN_v0.2.md`:
-  - [ ] Phase A — pure core (vector/engine/events/projection) + compatibility shim + seeding migrate()
-  - [ ] Phase B — event detector + user-pinned/memory-derived events + relationship panel
-  - [ ] Phase C — projections into prompt/greeting/narration/emotion + IndexedDB repository
-  - [ ] Phase D — cleanup, drop legacy scalar, NPC-edge readiness
+- [x] **Phase A** — pure core (vector/events/ledger/core/projection) + compatibility shim +
+  seeding migrate() + gated pipeline integration (memory events + prompt builder) behind
+  `relationshipEngineV2` (default OFF). 73 tests; see `MIGRATION_REPORT_v0.2-relationship.md`.
+- [ ] Phase B — text event detector + user-pinned events + relationship panel (UI)
+- [ ] Phase C — projections into greeting/narration/emotion baseline + IndexedDB repository
+- [ ] Phase D — promote flag to default, drop legacy scalar, NPC-edge readiness
+- [ ] (deferred) Emotion Engine integration — `relationshipBaselineBias` exists but is NOT wired
 
 ## Phase 1 — Foundation ✅ (PR #16)
 

@@ -86,10 +86,15 @@ ContextBuilder (budget-gated) → provider.streamChat → CognitiveStreamParser 
 ## Sprint log
 
 - **Phase 1** — foundation (see `docs/MIGRATION.md`, PR #16). 26 tests.
-- **Sprint 2 (v0.2.0) — Relationship Engine [DESIGN ONLY]** — nine-dimension, event-driven
-  relationship model replacing the v0.1 scalar. Architecture in `docs/relationship/` + `docs/adr/
-  ADR-0004`. No implementation yet; build follows `MIGRATION_PLAN_v0.2.md` (Phases A–D). Do not
-  begin Phase 4.
+- **Sprint 2 (v0.2.0) — Relationship Engine [DESIGN]** — nine-dimension, event-driven relationship
+  model replacing the v0.1 scalar. Architecture in `docs/relationship/` + `docs/adr/ADR-0004`.
+- **Sprint 2 (v0.2.0) — Relationship Engine [IMPL: Phase A, feature-flagged]** — pure core
+  (`src/core/relationship/relationship-{vector,events,ledger,core,projection,migration}.ts`),
+  application glue (`src/stores/relationship-runtime.ts`), gated integration in `chat-pipeline.ts`
+  behind `relationshipEngineV2` (default OFF, `src/lib/feature-flags.ts`). Legacy `{ affinity,
+  stageIndex }` seeded lazily; v0.1 path unchanged when the flag is off. 73 tests. Emotion-engine
+  wiring and UI deliberately deferred (Phase B/C, `MIGRATION_PLAN_v0.2.md`). See
+  `docs/relationship/MIGRATION_REPORT_v0.2-relationship.md`. Do not begin Phase 4 / Emotion Engine.
 - **Phase 2** — depth:
   - Character Consistency: `systemPromptOverride` ({{user}}/{{char}} substitution),
     `buildPersonaLock` (consistency rules injected every turn, never budget-trimmed),

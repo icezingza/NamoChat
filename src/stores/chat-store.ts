@@ -4,6 +4,8 @@ import type { AffectVector } from '../core/emotion/emotion-engine';
 import { createInitialAffect } from '../core/emotion/emotion-engine';
 import type { RelationshipState } from '../core/relationship/relationship-engine';
 import { createInitialRelationship } from '../core/relationship/relationship-engine';
+import type { RelationshipVector } from '../core/relationship/relationship-vector';
+import type { RelationshipEvent } from '../core/relationship/relationship-events';
 import type { MemoryRecordProps } from '../core/memory/memory-record';
 import type { TimelineEvent } from '../core/timeline/story-timeline';
 import { generateId } from '../lib/utils';
@@ -25,6 +27,11 @@ export interface Chat {
   messages: ChatMessage[];
   affect: AffectVector;
   relationship: RelationshipState;
+  // Relationship Engine v0.2 (feature-flagged, optional for backward compat).
+  // Seeded lazily from `relationship` on first v2 turn; the ledger is the audit
+  // trail. Absent on legacy chats until migrated.
+  relationshipV2?: RelationshipVector;
+  relationshipLedger?: RelationshipEvent[];
   memories: MemoryRecordProps[];
   timeline: TimelineEvent[];
   createdAt: number;
@@ -198,6 +205,13 @@ export const useChatStore = create<ChatState>()(
             chatId: m.role === 'world' ? m.chatId : forkId,
           })),
           timeline: source.timeline.map((event) => ({ ...event, chatId: forkId })),
+          // Branch inherits the relationship snapshot + ledger up to the fork,
+          // then diverges independently (RELATIONSHIP_SEQUENCE_DIAGRAM §4, B1).
+          relationshipV2: source.relationshipV2 ? { ...source.relationshipV2 } : undefined,
+          relationshipLedger: source.relationshipLedger?.map((event) => ({
+            ...event,
+            scopeId: forkId,
+          })),
           createdAt: Date.now(),
           updatedAt: Date.now(),
         };

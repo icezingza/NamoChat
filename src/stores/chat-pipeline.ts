@@ -18,6 +18,9 @@ import { CognitiveStreamParser } from '../core/cognition/stream-parser';
 import { createProvider } from '../core/providers/model-router';
 import type { ChatTurn, ModelProvider } from '../core/providers/types';
 import type { CharacterCard } from '../core/character/character';
+import type { MemoryRecordProps } from '../core/memory/memory-record';
+import { isRelationshipV2Enabled } from '../lib/feature-flags';
+import { advanceRelationship, commitRelationship, edgeIdFor } from './relationship-runtime';
 import { useChatStore, type Chat, type ChatMessage } from './chat-store';
 import { useSettingsStore } from './settings-store';
 import { generateId } from '../lib/utils';
@@ -88,6 +91,17 @@ const runTurn = async (
   const provider = createProvider(providerConfig);
   const identity = new IdentityCapsule(character.identity ?? emptyIdentity);
   const persona = derivePersonaState(identity, affect, relationship, relationshipEngine);
+
+  // Relationship Engine v0.2 (feature-flagged). When ON, advance the nine-dim
+  // vector and override the relationship-derived persona directives; the v0.1
+  // scalar path above still runs for backward compatibility.
+  const relationshipTurn = isRelationshipV2Enabled()
+    ? advanceRelationship(chat, signals)
+    : null;
+  const effectivePersona = relationshipTurn
+    ? { ...persona, ...relationshipTurn.personaOverride }
+    : persona;
+
   const memoryEngine = new MemoryEngine(chat.memories);
   const queryEmbedding = await safeEmbed(provider, userText);
   const memories = queryEmbedding
@@ -110,7 +124,7 @@ const runTurn = async (
     reservedOutputTokens: providerConfig.maxOutputTokens,
   });
   const context = buildTurnContext({
-    persona,
+    persona: effectivePersona,
     personaLock,
     memories,
     lore,
@@ -163,23 +177,24 @@ const runTurn = async (
   //    signals (slimmed EvolutionEngine behavior). Error text never becomes
   //    a memory, and re-run turns don't duplicate the user's record.
   const rememberedIds: string[] = [];
+  const savedMemories: MemoryRecordProps[] = [];
   if (!skipUserMemory) {
     // Reuse the query vector already computed for recall — no extra call.
-    rememberedIds.push(
-      memoryEngine.remember({
-        id: generateId(),
-        chatId: chat.id,
-        role: 'user',
-        content: userText,
-        emotionWeight: 0.5,
-        timestamp: Date.now(),
-        embedding: queryEmbedding,
-      }).id,
-    );
+    const userMemory: MemoryRecordProps = {
+      id: generateId(),
+      chatId: chat.id,
+      role: 'user',
+      content: userText,
+      emotionWeight: 0.5,
+      timestamp: Date.now(),
+      embedding: queryEmbedding,
+    };
+    rememberedIds.push(memoryEngine.remember(userMemory).id);
+    savedMemories.push(userMemory);
   }
   if (visible.trim() && !hasError) {
     const replyEmbedding = await safeEmbed(provider, visible);
-    memoryEngine.remember({
+    const replyMemory: MemoryRecordProps = {
       id: generateId(),
       chatId: chat.id,
       role: 'character',
@@ -187,13 +202,28 @@ const runTurn = async (
       emotionWeight: 0.5,
       timestamp: Date.now(),
       embedding: replyEmbedding,
-    });
+    };
+    memoryEngine.remember(replyMemory);
+    savedMemories.push(replyMemory);
   }
   memoryEngine.evaluateInteraction(
     [...rememberedIds, ...memories.map((m) => m.record.id)],
     signals,
   );
-  useChatStore.getState().patchChat(chat.id, { memories: memoryEngine.toProps() });
+
+  const patch: Partial<Chat> = { memories: memoryEngine.toProps() };
+  // Relationship v0.2 commit: apply memory-derived events and persist the vector
+  // + ledger. Only when the flag is on and the turn didn't error.
+  if (relationshipTurn && !hasError) {
+    const { relationshipV2, relationshipLedger } = commitRelationship(
+      relationshipTurn,
+      savedMemories,
+      { edgeId: edgeIdFor(character.id, chat.id), scopeId: chat.id },
+    );
+    patch.relationshipV2 = relationshipV2;
+    patch.relationshipLedger = relationshipLedger;
+  }
+  useChatStore.getState().patchChat(chat.id, patch);
 };
 
 const findChatAndCharacter = (
