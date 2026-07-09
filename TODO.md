@@ -26,6 +26,14 @@ design quarantines on import. Implementation deferred (Phases A–E in the migra
 - [ ] Phase A — schema/validator/injection-scanner module (pure)
 - [ ] Phase B–E — importer, registry/IndexedDB, flag-gated lore-seam wiring, UI
 
+## Generic Lore Engine (v0.2.x) — DESIGN ONLY
+
+Generalize the minimal `core/lore` into a four-scope (character/world/scenario/private),
+model-independent Lore Engine integrated with the Relationship (v0.2) and Memory engines. Design in
+`docs/lore/` (LORE_ENGINE_SPEC, LORE_ENTRY_SCHEMA, LORE_RETRIEVAL_PIPELINE, JANITOR_IMPORT_ADAPTER).
+- [x] Spec + entry schema + retrieval pipeline + Janitor import-adapter design
+- [ ] Implementation deferred (pure core first; backward compatible with existing `matchLore`)
+
 ## Phase 1 — Foundation ✅ (PR #16)
 
 - [x] Repo analysis + migration doc + architecture doc
