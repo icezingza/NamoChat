@@ -1,0 +1,123 @@
+@import 'tailwindcss';
+
+@theme {
+  --color-surface-950: #0b0b12;
+  --color-surface-900: #12121c;
+  --color-surface-800: #1a1a28;
+  --color-surface-700: #242437;
+  --color-surface-600: #32324a;
+  --color-accent-500: #a855f7;
+  --color-accent-400: #c084fc;
+  --color-rose-flame: #fb7185;
+  --font-sans: 'Inter', 'Noto Sans Thai', system-ui, sans-serif;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  @apply bg-surface-950 text-zinc-100 antialiased;
+  overscroll-behavior: none;
+}
+
+/* Smooth message entrance */
+@keyframes message-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-message-in {
+  animation: message-in 0.25s ease-out;
+}
+
+@keyframes view-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-view-in {
+  animation: view-in 0.2s ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-message-in,
+  .animate-view-in,
+  .typing-dot {
+    animation: none;
+  }
+}
+
+@keyframes pulse-dot {
+  0%,
+  80%,
+  100% {
+    transform: scale(0.6);
+    opacity: 0.4;
+  }
+  40% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.typing-dot {
+  animation: pulse-dot 1.2s infinite ease-in-out;
+}
+.typing-dot:nth-child(2) {
+  animation-delay: 0.15s;
+}
+.typing-dot:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+/* Markdown content inside bubbles */
+.prose-chat p {
+  margin: 0.35rem 0;
+}
+.prose-chat em {
+  @apply text-accent-400;
+}
+.prose-chat strong {
+  @apply text-zinc-50;
+}
+.prose-chat code {
+  @apply rounded bg-surface-700 px-1 py-0.5 text-[0.85em];
+}
+.prose-chat pre {
+  @apply my-2 overflow-x-auto rounded-lg bg-surface-900 p-3;
+}
+.prose-chat img {
+  @apply my-2 max-h-72 rounded-xl;
+}
+.prose-chat a {
+  @apply text-accent-400 underline;
+}
+.prose-chat blockquote {
+  @apply my-2 border-l-2 border-rose-flame/60 pl-3 text-zinc-400;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-thumb {
+  @apply rounded-full bg-surface-600;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
