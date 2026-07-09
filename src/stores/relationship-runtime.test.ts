@@ -39,8 +39,8 @@ describe('advanceRelationship / commitRelationship', () => {
 
   it('seeds from legacy on first turn and yields persona directives', () => {
     const turn = advanceRelationship(chat, { toneScore: 0.5, conflictLevel: 0 });
-    expect(turn.personaOverride.stageName).toBe('Companion');
-    expect(turn.personaOverride.stageDirective).toContain('Narration:');
+    expect(turn.view.stageName).toBe('Companion');
+    expect(turn.view.stageDirective).toContain('Narration:');
     expect(turn.ledger).toEqual([]);
   });
 

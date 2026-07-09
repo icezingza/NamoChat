@@ -4,9 +4,9 @@
 // scalar path is unchanged when the flag is OFF. Keeps the pure core free of
 // store/DOM concerns (RELATIONSHIP_SEQUENCE_DIAGRAM §1).
 
-import type { EmotionSignals } from '../core/emotion/emotion-engine';
+import type { AffectVector, EmotionSignals } from '../core/emotion/emotion-engine';
 import type { MemoryRecordProps } from '../core/memory/memory-record';
-import type { RelationshipState } from '../core/relationship/relationship-engine';
+import type { RelationshipEngine, RelationshipState } from '../core/relationship/relationship-engine';
 import {
   type RelationshipVector,
   type CharacterRelationshipPolicy,
@@ -21,6 +21,8 @@ import {
   projectStage,
   type StageProjection,
 } from '../core/relationship/relationship-projection';
+import type { RelationshipView } from '../core/soul/soul-core';
+import { isRelationshipV2Enabled } from '../lib/feature-flags';
 import { generateId } from '../lib/utils';
 
 export interface RelationshipEdgeContext {
@@ -36,15 +38,11 @@ export interface RelationshipTurn {
   vector: RelationshipVector; // after the capped ambient update
   ledger: RelationshipEvent[];
   previousStage: StageProjection;
-  personaOverride: {
-    stageName: string;
-    stageDirective: string;
-    attachmentDirective: string;
-  };
+  view: RelationshipView; // the single relationship input to persona fusion
 }
 
 // Pre-response: migrate/seed if needed, apply the capped ambient update, and
-// build the relationship directives folded into the prompt (Step 6).
+// build the RelationshipView folded into the prompt (Step 6).
 export const advanceRelationship = (
   chat: {
     relationship: RelationshipState;
@@ -65,7 +63,7 @@ export const advanceRelationship = (
   const vector = applyAmbient(seed, signals);
   const persona = toPersonaInputs(vector, previousStage);
 
-  // Compact relationship conditioning appended to the stage directive so it
+  // Compact relationship conditioning folded into the stage directive so it
   // rides the never-trimmed persona region of the prompt.
   const extras = [
     persona.dimensionNotes ? `[${persona.dimensionNotes}]` : '',
@@ -78,11 +76,65 @@ export const advanceRelationship = (
     vector,
     ledger: chat.relationshipLedger ?? [],
     previousStage,
-    personaOverride: {
+    view: {
       stageName: persona.stageName,
       stageDirective: [persona.stageDirective, extras].filter(Boolean).join(' '),
       attachmentDirective: persona.attachmentDirective,
+      narrationTone: persona.narrationTone,
+      dimensionNotes: persona.dimensionNotes,
+      overlay: persona.stageProjection.overlay,
+      vector,
     },
+  };
+};
+
+// The v0.1 scalar path expressed as the same RelationshipView shape, so the
+// persona-fusion seam has exactly ONE relationship input regardless of flag.
+export const relationshipViewFromV1 = (
+  state: RelationshipState,
+  engine: RelationshipEngine,
+  affect: AffectVector,
+): RelationshipView => {
+  const stage = engine.stageOf(state);
+  const attachment = engine.attachmentStyleOf(state, affect.trust);
+  return {
+    stageName: stage.name,
+    stageDirective: stage.promptModifier,
+    attachmentDirective: attachment.promptDirective,
+    narrationTone: '',
+    dimensionNotes: '',
+    overlay: 'Normal',
+  };
+};
+
+export interface ResolvedRelationship {
+  view: RelationshipView; // single source of truth for this turn
+  turn: RelationshipTurn | null; // present only when v2 is active → used for commit
+}
+
+// Single producer of the per-turn RelationshipView. Reads the feature flag here
+// (the only place), so the pipeline no longer branches on it or merges two
+// relationship sources. v2 → advance + project; v1 → scalar view.
+export const resolveRelationshipView = (params: {
+  chat: {
+    relationship: RelationshipState;
+    relationshipV2?: RelationshipVector;
+    relationshipLedger?: RelationshipEvent[];
+    messages: unknown[];
+  };
+  relationshipState: RelationshipState; // v1-progressed state for this turn
+  relationshipEngine: RelationshipEngine;
+  affect: AffectVector;
+  signals: EmotionSignals;
+  policy?: CharacterRelationshipPolicy;
+}): ResolvedRelationship => {
+  if (isRelationshipV2Enabled()) {
+    const turn = advanceRelationship(params.chat, params.signals, params.policy);
+    return { view: turn.view, turn };
+  }
+  return {
+    view: relationshipViewFromV1(params.relationshipState, params.relationshipEngine, params.affect),
+    turn: null,
   };
 };
 

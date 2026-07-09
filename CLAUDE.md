@@ -94,7 +94,14 @@ ContextBuilder (budget-gated) → provider.streamChat → CognitiveStreamParser 
   behind `relationshipEngineV2` (default OFF, `src/lib/feature-flags.ts`). Legacy `{ affinity,
   stageIndex }` seeded lazily; v0.1 path unchanged when the flag is off. 73 tests. Emotion-engine
   wiring and UI deliberately deferred (Phase B/C, `MIGRATION_PLAN_v0.2.md`). See
-  `docs/relationship/MIGRATION_REPORT_v0.2-relationship.md`. Do not begin Phase 4 / Emotion Engine.
+  `docs/relationship/MIGRATION_REPORT_v0.2-relationship.md`.
+- **Phase 4A Sprint 1 — single-source relationship (refactor)** — eliminated the dual-path
+  relationship flow. One `RelationshipView` (`core/soul/soul-core.ts`) is produced by
+  `resolveRelationshipView` (`stores/relationship-runtime.ts`) — v2 projection when the flag is ON,
+  v1 scalar view when OFF — and `derivePersonaState` consumes only that view. Removed the pipeline
+  object-spread override. `PersonaState` gained first-class `narrationTone`/`dimensionNotes`/
+  `overlay`. Flag compatibility + backward compatibility preserved; 77 tests (+4 regression). See
+  `docs/architecture/CONTEXT_INTELLIGENCE_REMEDIATION_PLAN.md` §1–§2. Do not begin Emotion Engine.
 - **Phase 2** — depth:
   - Character Consistency: `systemPromptOverride` ({{user}}/{{char}} substitution),
     `buildPersonaLock` (consistency rules injected every turn, never budget-trimmed),

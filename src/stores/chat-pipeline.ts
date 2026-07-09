@@ -19,8 +19,7 @@ import { createProvider } from '../core/providers/model-router';
 import type { ChatTurn, ModelProvider } from '../core/providers/types';
 import type { CharacterCard } from '../core/character/character';
 import type { MemoryRecordProps } from '../core/memory/memory-record';
-import { isRelationshipV2Enabled } from '../lib/feature-flags';
-import { advanceRelationship, commitRelationship, edgeIdFor } from './relationship-runtime';
+import { commitRelationship, edgeIdFor, resolveRelationshipView } from './relationship-runtime';
 import { useChatStore, type Chat, type ChatMessage } from './chat-store';
 import { useSettingsStore } from './settings-store';
 import { generateId } from '../lib/utils';
@@ -90,17 +89,18 @@ const runTurn = async (
   //    embed must never break the turn; Memory is priority 2).
   const provider = createProvider(providerConfig);
   const identity = new IdentityCapsule(character.identity ?? emptyIdentity);
-  const persona = derivePersonaState(identity, affect, relationship, relationshipEngine);
 
-  // Relationship Engine v0.2 (feature-flagged). When ON, advance the nine-dim
-  // vector and override the relationship-derived persona directives; the v0.1
-  // scalar path above still runs for backward compatibility.
-  const relationshipTurn = isRelationshipV2Enabled()
-    ? advanceRelationship(chat, signals)
-    : null;
-  const effectivePersona = relationshipTurn
-    ? { ...persona, ...relationshipTurn.personaOverride }
-    : persona;
+  // Single source of truth for the relationship: one RelationshipView, produced
+  // by the resolver (v2 projection when the flag is ON, v1 scalar view when OFF).
+  // No dual-path override — Soul Core consumes the view directly.
+  const resolvedRelationship = resolveRelationshipView({
+    chat,
+    relationshipState: relationship,
+    relationshipEngine,
+    affect,
+    signals,
+  });
+  const persona = derivePersonaState(identity, affect, resolvedRelationship.view);
 
   const memoryEngine = new MemoryEngine(chat.memories);
   const queryEmbedding = await safeEmbed(provider, userText);
@@ -124,7 +124,7 @@ const runTurn = async (
     reservedOutputTokens: providerConfig.maxOutputTokens,
   });
   const context = buildTurnContext({
-    persona: effectivePersona,
+    persona,
     personaLock,
     memories,
     lore,
@@ -214,9 +214,9 @@ const runTurn = async (
   const patch: Partial<Chat> = { memories: memoryEngine.toProps() };
   // Relationship v0.2 commit: apply memory-derived events and persist the vector
   // + ledger. Only when the flag is on and the turn didn't error.
-  if (relationshipTurn && !hasError) {
+  if (resolvedRelationship.turn && !hasError) {
     const { relationshipV2, relationshipLedger } = commitRelationship(
-      relationshipTurn,
+      resolvedRelationship.turn,
       savedMemories,
       { edgeId: edgeIdFor(character.id, chat.id), scopeId: chat.id },
     );
