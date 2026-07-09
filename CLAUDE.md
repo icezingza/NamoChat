@@ -86,6 +86,10 @@ ContextBuilder (budget-gated) → provider.streamChat → CognitiveStreamParser 
 ## Sprint log
 
 - **Phase 1** — foundation (see `docs/MIGRATION.md`, PR #16). 26 tests.
+- **Sprint 2 (v0.2.0) — Relationship Engine [DESIGN ONLY]** — nine-dimension, event-driven
+  relationship model replacing the v0.1 scalar. Architecture in `docs/relationship/` + `docs/adr/
+  ADR-0004`. No implementation yet; build follows `MIGRATION_PLAN_v0.2.md` (Phases A–D). Do not
+  begin Phase 4.
 - **Phase 2** — depth:
   - Character Consistency: `systemPromptOverride` ({{user}}/{{char}} substitution),
     `buildPersonaLock` (consistency rules injected every turn, never budget-trimmed),

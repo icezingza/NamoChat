@@ -3,6 +3,17 @@
 Sequenced by project priority: **1 Character Consistency · 2 Memory · 3 Roleplay · 4 UI/UX · 5 Performance · 6 Clean Code.**
 Never sacrifice character consistency; never break memory.
 
+## Sprint 2 (v0.2.0) — Relationship Engine
+
+**Design gate (this sprint): documentation only — NO implementation.**
+- [x] ADR-0004 + 7 design docs under `docs/relationship/` (SPEC, STATE_MACHINE, DATABASE_SCHEMA,
+  SEQUENCE_DIAGRAM, API, TEST_PLAN, MIGRATION_PLAN_v0.2) + index
+- [ ] Implementation deferred to a later sprint, phased per `MIGRATION_PLAN_v0.2.md`:
+  - [ ] Phase A — pure core (vector/engine/events/projection) + compatibility shim + seeding migrate()
+  - [ ] Phase B — event detector + user-pinned/memory-derived events + relationship panel
+  - [ ] Phase C — projections into prompt/greeting/narration/emotion + IndexedDB repository
+  - [ ] Phase D — cleanup, drop legacy scalar, NPC-edge readiness
+
 ## Phase 1 — Foundation ✅ (PR #16)
 
 - [x] Repo analysis + migration doc + architecture doc
