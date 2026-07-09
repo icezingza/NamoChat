@@ -100,7 +100,7 @@ const runTurn = async (
     affect,
     signals,
   });
-  const persona = derivePersonaState(identity, affect, resolvedRelationship.view);
+  const persona = derivePersonaState({ identity, affect, relationship: resolvedRelationship.view });
 
   const memoryEngine = new MemoryEngine(chat.memories);
   const queryEmbedding = await safeEmbed(provider, userText);

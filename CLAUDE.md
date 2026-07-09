@@ -101,7 +101,16 @@ ContextBuilder (budget-gated) → provider.streamChat → CognitiveStreamParser 
   v1 scalar view when OFF — and `derivePersonaState` consumes only that view. Removed the pipeline
   object-spread override. `PersonaState` gained first-class `narrationTone`/`dimensionNotes`/
   `overlay`. Flag compatibility + backward compatibility preserved; 77 tests (+4 regression). See
-  `docs/architecture/CONTEXT_INTELLIGENCE_REMEDIATION_PLAN.md` §1–§2. Do not begin Emotion Engine.
+  `docs/architecture/CONTEXT_INTELLIGENCE_REMEDIATION_PLAN.md` §1–§2.
+- **Phase 4A Sprint 2 — Soul Core consolidation (refactor)** — Soul Core is the single persona-
+  fusion point. `derivePersonaState` takes a single `DerivePersonaStateInput` object; `PersonaState`
+  is `readonly` + `Object.freeze`d. Persona assembly is centralized in `renderPersonaBlock`; the
+  context builder no longer templates persona fields, and `relationship-runtime.ts` no longer folds
+  `narrationTone`/`dimensionNotes` into `stageDirective` (they flow through as first-class typed
+  fields). The v0.1 flag-OFF block shape is preserved (extra lines suppressed when empty/Normal). A
+  glob-based structural guard test (`soul-core.test.ts`) prevents future persona string-concat
+  regressions outside `core/soul/`. 84 tests (+7 regression). Do not begin Emotion Engine, Lore
+  runtime, Scenario Pack runtime, or the Prompt Composer redesign.
 - **Phase 2** — depth:
   - Character Consistency: `systemPromptOverride` ({{user}}/{{char}} substitution),
     `buildPersonaLock` (consistency rules injected every turn, never budget-trimmed),

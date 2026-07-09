@@ -3,7 +3,7 @@
 // insertion gated through TokenBudget (donor-repo rule: never append ungated
 // context). Pure: takes data in, returns strings out.
 
-import type { PersonaState } from '../soul/soul-core';
+import { renderPersonaBlock, type PersonaState } from '../soul/soul-core';
 import type { MemorySearchResult } from '../memory/memory-record';
 import type { LoreMatch } from '../lore/lore-engine';
 import { TokenBudget } from './token-budget';
@@ -20,12 +20,10 @@ export interface TurnContextInput {
 }
 
 export const buildTurnContext = (input: TurnContextInput): string => {
-  // Mandatory blocks: persona lock (consistency) + persona reminder + stage
-  // directives. These are small, bounded, and never dropped for budget.
-  const personaBlock = [
-    `[Persona] ${input.persona.distilledIdentity}`,
-    `[Relationship: ${input.persona.stageName}] ${input.persona.stageDirective} ${input.persona.attachmentDirective}`,
-  ].join('\n');
+  // Mandatory blocks: persona lock (consistency) + persona reminder assembled
+  // by Soul Core (renderPersonaBlock). Persona-related string composition lives
+  // in one place (Soul Core), never in the context builder (Sprint 2).
+  const personaBlock = renderPersonaBlock(input.persona);
   const mandatoryBlocks = [input.personaLock, personaBlock].filter(Boolean);
 
   // Optional, priority-ordered candidates trimmed to the remaining budget.

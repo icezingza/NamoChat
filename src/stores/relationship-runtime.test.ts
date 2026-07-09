@@ -40,7 +40,10 @@ describe('advanceRelationship / commitRelationship', () => {
   it('seeds from legacy on first turn and yields persona directives', () => {
     const turn = advanceRelationship(chat, { toneScore: 0.5, conflictLevel: 0 });
     expect(turn.view.stageName).toBe('Companion');
-    expect(turn.view.stageDirective).toContain('Narration:');
+    // Sprint 2: narration is a first-class field on the view (not smuggled inside
+    // stageDirective via string concat).
+    expect(turn.view.narrationTone).not.toBe('');
+    expect(turn.view.stageDirective).not.toContain('Narration:');
     expect(turn.ledger).toEqual([]);
   });
 

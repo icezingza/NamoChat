@@ -61,28 +61,23 @@ export const advanceRelationship = (
   });
   const previousStage = projectStage(seed);
   const vector = applyAmbient(seed, signals);
-  const persona = toPersonaInputs(vector, previousStage);
-
-  // Compact relationship conditioning folded into the stage directive so it
-  // rides the never-trimmed persona region of the prompt.
-  const extras = [
-    persona.dimensionNotes ? `[${persona.dimensionNotes}]` : '',
-    `Narration: ${persona.narrationTone}.`,
-  ]
-    .filter(Boolean)
-    .join(' ');
+  // Sprint 2: renamed from `persona` — the projection helper returns the
+  // relationship projection inputs, not a PersonaState. Soul Core owns
+  // PersonaState; every field here flows straight through as typed data (no
+  // persona-related string concatenation lives outside Soul Core).
+  const projection = toPersonaInputs(vector, previousStage);
 
   return {
     vector,
     ledger: chat.relationshipLedger ?? [],
     previousStage,
     view: {
-      stageName: persona.stageName,
-      stageDirective: [persona.stageDirective, extras].filter(Boolean).join(' '),
-      attachmentDirective: persona.attachmentDirective,
-      narrationTone: persona.narrationTone,
-      dimensionNotes: persona.dimensionNotes,
-      overlay: persona.stageProjection.overlay,
+      stageName: projection.stageName,
+      stageDirective: projection.stageDirective,
+      attachmentDirective: projection.attachmentDirective,
+      narrationTone: projection.narrationTone,
+      dimensionNotes: projection.dimensionNotes,
+      overlay: projection.stageProjection.overlay,
       vector,
     },
   };

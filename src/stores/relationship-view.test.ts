@@ -58,7 +58,7 @@ describe('derivePersonaState consumes the view only', () => {
       dimensionNotes: 'candid',
       overlay: 'Normal',
     };
-    const persona = derivePersonaState(identity, affect, view);
+    const persona = derivePersonaState({ identity, affect, relationship: view });
     expect(persona.stageName).toBe(view.stageName);
     expect(persona.stageDirective).toBe(view.stageDirective);   // NOT re-composed/merged
     expect(persona.attachmentDirective).toBe(view.attachmentDirective);
@@ -77,7 +77,7 @@ describe('backward compatibility (flag OFF is byte-for-byte the old v1 flow)', (
     const resolved = resolveRelationshipView({
       chat: baseChat, relationshipState: state, relationshipEngine: engine, affect, signals,
     });
-    const persona = derivePersonaState(identity, affect, resolved.view);
+    const persona = derivePersonaState({ identity, affect, relationship: resolved.view });
     const stage = engine.stageOf(state);
     const attachment = engine.attachmentStyleOf(state, affect.trust);
     expect(persona.stageName).toBe(stage.name);
