@@ -3,6 +3,10 @@
 Premium, personal-use **AI roleplay chat platform**. Local-first browser app (no server, no auth,
 no payments). Built by consolidating the NaMo ecosystem repos — see `docs/MIGRATION.md`.
 
+**Canonical repository:** https://github.com/icezingza/NamoChat — the single source of truth for
+all NamoChat development. The seven NaMo-ecosystem repositories are read-only migration references;
+do not develop NamoChat in them.
+
 ## Priority order (never violate)
 
 1. **Character Consistency** — persona must never drift. `consistencyRules` and the character's

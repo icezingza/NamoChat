@@ -4,6 +4,11 @@
   "version": "0.1.0",
   "type": "module",
   "description": "NamoChat — premium AI roleplay chat platform (personal use)",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/icezingza/NamoChat.git"
+  },
+  "homepage": "https://github.com/icezingza/NamoChat#readme",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",

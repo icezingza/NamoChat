@@ -4,10 +4,13 @@ A premium, personal-use **AI roleplay chat platform** — original architecture 
 consolidating the reusable modules of the NaMo ecosystem repositories
 (see [docs/MIGRATION.md](docs/MIGRATION.md) and [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)).
 
-> **Canonical repository.** NamoChat was extracted from its Foundation incubation in
-> `sovereign-platform-v3` (tagged `foundation`) into this independent product. The seven
-> NaMo-ecosystem repositories are now **read-only migration references**. See
-> [docs/MIGRATION_REPORT.md](docs/MIGRATION_REPORT.md) for what was imported, rewritten, and removed.
+> **Canonical repository — https://github.com/icezingza/NamoChat**
+> NamoChat was extracted from its Foundation incubation in `sovereign-platform-v3`
+> (tagged `foundation`) into this independent product, which is now the single source of truth
+> for all NamoChat development. The seven NaMo-ecosystem repositories are **read-only migration
+> references** — no NamoChat work happens in them. See
+> [docs/MIGRATION_REPORT.md](docs/MIGRATION_REPORT.md) for what was imported, rewritten, and
+> removed, and [PROJECT_STATUS.md](PROJECT_STATUS.md) for current status.
 
 Local-first: no server, no accounts, no payments. Chats, characters and API keys live in your
 browser; model requests go directly to the provider you configure.
