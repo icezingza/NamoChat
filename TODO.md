@@ -16,6 +16,16 @@ Never sacrifice character consistency; never break memory.
 - [ ] Phase D — promote flag to default, drop legacy scalar, NPC-edge readiness
 - [ ] (deferred) Emotion Engine integration — `relationshipBaselineBias` exists but is NOT wired
 
+## Scenario Pack System (v0.2.x) — DESIGN ONLY
+
+Optional, opt-in extension packs (external lore data; **off by default**; no core/engine changes).
+Design in `docs/scenario-packs/` (ARCHITECTURE, SCHEMA, MIGRATION_PLAN). Note: the uploaded
+"Sex Positions & Kinks" SillyTavern lorebook contains a prompt-injection `debug` entry that the
+design quarantines on import. Implementation deferred (Phases A–E in the migration plan).
+- [x] Architecture + schema + migration/rollout docs
+- [ ] Phase A — schema/validator/injection-scanner module (pure)
+- [ ] Phase B–E — importer, registry/IndexedDB, flag-gated lore-seam wiring, UI
+
 ## Phase 1 — Foundation ✅ (PR #16)
 
 - [x] Repo analysis + migration doc + architecture doc
