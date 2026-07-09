@@ -119,6 +119,7 @@ describe('no persona-related string assembly outside Soul Core', () => {
     'relationship-view.test.ts',
     'relationship-runtime.test.ts',
     'prompt.test.ts',
+    'context-allocator.test.ts', // fixture literals for allocator regression tests
   ];
 
   it('no source file templates persona strings outside of core/soul', () => {

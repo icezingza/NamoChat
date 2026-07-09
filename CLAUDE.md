@@ -109,8 +109,21 @@ ContextBuilder (budget-gated) → provider.streamChat → CognitiveStreamParser 
   `narrationTone`/`dimensionNotes` into `stageDirective` (they flow through as first-class typed
   fields). The v0.1 flag-OFF block shape is preserved (extra lines suppressed when empty/Normal). A
   glob-based structural guard test (`soul-core.test.ts`) prevents future persona string-concat
-  regressions outside `core/soul/`. 84 tests (+7 regression). Do not begin Emotion Engine, Lore
-  runtime, Scenario Pack runtime, or the Prompt Composer redesign.
+  regressions outside `core/soul/`. 84 tests (+7 regression).
+- **Phase 4A Sprint 3 — Prompt Composer / Context Allocation Engine (refactor)** — the append-
+  style composition (`selectWithinBudget` over an ad-hoc candidates array) is replaced by a
+  centralized allocator (`core/prompt/context-allocator.ts`) with the pipeline
+  `collect → rank → allocate → compose`. Every section carries `tier`
+  (`mandatory` = system prompt + history; `protected` = persona lock + persona block;
+  `optional` = story recap + world lore + triggered lore + memory) and a priority
+  independent of display order. Enforces **Memory Floor** (`memoryFloor: 2` — up to N memories
+  survive tight budgets before any lore/recap), **Lore Cap** (`loreCap: 6` — max lore admitted;
+  world facts win over triggered), and a **Shared Optional Budget** across memory/lore/recap.
+  Memory ranks above lore in selection but keeps its trailing display position so unpressured
+  output is byte-for-byte identical to Sprint 2. Adds `PromptSnapshot` (kept/dropped sections +
+  `tokensUsed`/`inputBudget`/`config`) via a new `buildContextSnapshot` — debug/test-only; the
+  chat pipeline still calls `buildTurnContext` and receives a string. 98 tests (+14 regression).
+  Do not begin Emotion Engine, Lore runtime, or Scenario Pack runtime.
 - **Phase 2** — depth:
   - Character Consistency: `systemPromptOverride` ({{user}}/{{char}} substitution),
     `buildPersonaLock` (consistency rules injected every turn, never budget-trimmed),
