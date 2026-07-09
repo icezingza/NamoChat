@@ -23,8 +23,8 @@
 | 1 | Push standalone repo to GitHub | ✅ `main` pushed |
 | 2 | Push all branches | ✅ only `main` exists |
 | 3 | Push tags (`foundation`, `v0.1.0`) | ⛔ **Blocked** — git proxy rejects tag refs (see below) |
-| 4 | Verify remote repository state | ✅ `main` @ `60e7b94`, 61 files |
-| 5 | Configure GitHub Actions | ✅ CI workflow added |
+| 4 | Verify remote repository state | ✅ `main` published; CI run #1 green |
+| 5 | Configure GitHub Actions | ✅ CI (typecheck→test→build) — first run **passed** |
 | 6 | Verify tests after cloning from remote | ✅ fresh clone → 32/32 pass |
 | 7 | Create GitHub Release (v0.1.0) | ⛔ **Blocked** — depends on tag; no release-creation API tool available |
 | 8 | README states canonical | ✅ |
